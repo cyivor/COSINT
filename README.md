@@ -1,6 +1,13 @@
 # COSINT
 Collective Open-Source Intelligence (COSINT) is a tool which encompasses multiple OSINT tools and toolkits, keeping the data and automating searches.
 
+## Notes
+- Storage efficient
+- Good security
+- Rotating API routes (upon run-time)
+- Quick
+- Encrypted user database (with hashed passwords)
+
 ## Before running
 <sup>It is important you read this or it won't work</sup>
 
