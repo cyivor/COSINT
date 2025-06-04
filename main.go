@@ -23,6 +23,7 @@ import (
 	"os"
 	"time"
 
+	"cyivor/cosint/db"
 	"cyivor/cosint/handlers"
 	"cyivor/cosint/logger"
 
@@ -48,9 +49,20 @@ func main() {
 	}
 
 	if err != nil {
-		log.Fatalf("Failed to initialize logger: %v", err)
+		log.Fatalf("Failed to initialise logger: %v", err)
 	}
 	defer logger.Sync()
+
+	dbKey := os.Getenv("DB_KEY")
+	if dbKey == "" {
+		logger.Fatal("DB_KEY environment variable not set")
+	}
+
+	database, err := db.InitDB("./cosint.db", dbKey, logger)
+	if err != nil {
+		logger.Fatal("Failed to initialise database", zap.Error(err))
+	}
+	defer database.Close()
 
 	key, err := RAPIRK()
 	if err != nil {
@@ -71,9 +83,15 @@ func main() {
 	// root route
 	r.GET("/", handlers.RootHandler(apiRoute))
 
+	// set logger context for /login
+	r.Use(func(c *gin.Context) {
+		c.Set("logger", logger)
+		c.Next()
+	})
+
 	// auth routes
 	r.GET("/auth", handlers.AuthHandler)
-	r.POST("/login", handlers.LoginHandler(apiRoute, jwtSecret))
+	r.POST("/login", handlers.LoginHandler(apiRoute, jwtSecret, database))
 
 	// protected cosint routes
 	cosint := r.Group(apiRoute+"/cosint", handlers.AuthMiddleware(apiRoute, jwtSecret, logger))
