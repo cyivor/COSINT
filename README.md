@@ -3,12 +3,12 @@ Collective Open-Source Intelligence (COSINT) is a tool which encompasses multipl
 
 ## Todo
 * short-term
- * create user database
-  * encrypted
+  * create user database
+    * encrypted
   
 * long-term
- * add support for nosint
- * add support for maigret
- * add support for telegram bots
-  * parsing modules will be needed
- * add dorking support
+  * add support for nosint
+  * add support for maigret
+  * add support for telegram bots
+    * parsing modules will be needed
+  * add dorking support
