@@ -4,7 +4,7 @@ Collective Open-Source Intelligence (COSINT) is a tool which encompasses multipl
 ## Todo
 * short-term
   - [x] create user database
-  - [] create register page
+  - [ ] create register page
 
   
 * long-term
