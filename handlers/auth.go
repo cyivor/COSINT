@@ -57,16 +57,16 @@ func AuthHandler(c *gin.Context) {
 	})
 }
 
-func NewUserHandler(apiRoute string) gin.HandlerFunc {
+func NewUserHandler(capir string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.HTML(http.StatusOK, "register.tmpl", gin.H{
-			"title":    "Create new user",
-			"apiRoute": apiRoute,
+			"title": "Create new user",
+			"capir": capir,
 		})
 	}
 }
 
-func RegisterHandler(apiRoute string, jwtSecret []byte, dbKey string) gin.HandlerFunc {
+func RegisterHandler(jwtSecret []byte, dbKey string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.PostForm("userid")
 		password := c.PostForm("password")

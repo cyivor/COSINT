@@ -57,6 +57,8 @@ func main() {
 		logger.Fatal("DB_KEY environment variable not set")
 	}
 
+	snusKey := os.Getenv("SNUSBASE_KEY")
+
 	database, err := db.InitDB("./cosint.db", dbKey, logger)
 	if err != nil {
 		logger.Fatal("Failed to initialise database", zap.Error(err))
@@ -80,6 +82,11 @@ func main() {
 	// r.StaticFile("/favicon.ico", "./static/favicon.ico")
 	// only keeping this because ill probably convert a png to ico at some point but i just don't know what logo yet lol
 
+	// protected cosint routes
+	// these variables make it easier but now i have to go ahead and edit the template files
+	capir := apiRoute + "/cosint"
+	extapir := capir + "/ext-apis"
+
 	// root route
 	r.GET("/", handlers.RootHandler(apiRoute))
 
@@ -93,16 +100,26 @@ func main() {
 	r.GET("/auth", handlers.AuthHandler)
 	r.POST("/login", handlers.LoginHandler(apiRoute, jwtSecret, database))
 
-	// protected cosint routes
-	cosint := r.Group(apiRoute+"/cosint", handlers.AuthMiddleware(apiRoute, jwtSecret, logger))
+	cosint := r.Group(capir, handlers.AuthMiddleware(apiRoute, jwtSecret, logger))
+	externalAPIs := r.Group(extapir, handlers.AuthMiddleware(apiRoute, jwtSecret, logger))
 	{
 		// GET
-		cosint.GET("/", handlers.HomeHandler(apiRoute))
+		cosint.GET("/", handlers.HomeHandler(capir))
 		cosint.GET("/identity", handlers.VerifyIdentity)
-		cosint.GET("/create-new-user", handlers.NewUserHandler(apiRoute))
+		cosint.GET("/create-new-user", handlers.NewUserHandler(capir))
 
 		// POST
-		cosint.POST("/new", handlers.RegisterHandler(apiRoute, jwtSecret, dbKey))
+		cosint.POST("/new", handlers.RegisterHandler(jwtSecret, dbKey))
+	}
+	{
+		// GET
+		externalAPIs.GET("/", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, capir)
+		})
+		externalAPIs.GET("/snusbase", handlers.SnusHandler(extapir))
+
+		// POST
+		externalAPIs.POST("/snusbase", handlers.SnusResults(capir, snusKey))
 	}
 
 	// http server

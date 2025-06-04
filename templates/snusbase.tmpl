@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ .title }}</title>
+    <style>
+        .error { color: red; }
+        .form-container { max-width: 300px; margin: 50px auto; }
+        input { margin: 10px 0; padding: 5px; width: 100%; }
+        button { padding: 10px; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>{{ .title }}</h1>
+        {{ if .error }}
+            <p class="error">{{ .error }}</p>
+        {{ end }}
+        <form method="POST" action="{{ .extapir }}/snusbase">
+        <!--- make handlers.Results --->
+            <label for="searchTerm">Search:</label>
+            <input type="text" id="searchTerm" name="searchTerm" required>
+            <label for="field">Select Field:</label>
+            <select id="field" name="field" required>
+                <option value="username">Username</option>
+                <option value="email">Email</option>
+                <option value="lastip">Last IP</option>
+                <option value="hash">Hash</option>
+                <option value="salt">Salt</option>
+                <option value="password">Password</option>
+                <option value="name">Name</option>
+                <option value="_domain">_Domain</option>
+                <option value="id">ID</option>
+                <option value="uid">UID</option>
+                <option value="phone">Phone</option>
+                <option value="domain">Domain</option>
+                <option value="date">Date</option>
+                <option value="created">Created</option>
+                <option value="host">Host</option>
+                <option value="followers">Followers</option>
+                <option value="updated">Updated</option>
+                <option value="address">Address</option>
+                <option value="birthdate">Birthdate</option>
+                <option value="other">Other</option>
+                <option value="city">City</option>
+                <option value="state">State</option>
+                <option value="country">Country</option>
+                <option value="zip">Zip</option>
+                <option value="unparsed">Unparsed</option>
+                <option value="gender">Gender</option>
+                <option value="company">Company</option>
+                <option value="language">Language</option>
+                <option value="url">URL</option>
+                <option value="job">Job</option>
+                <option value="regip">Reg IP</option>
+            </select>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</body>
+</html>

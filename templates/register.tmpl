@@ -15,7 +15,7 @@
         {{ if .error }}
             <p class="error">{{ .error }}</p>
         {{ end }}
-        <form method="POST" action="{{ .apiRoute }}/cosint/new">
+        <form method="POST" action="{{ .capir }}/new">
             <label for="userid">User ID:</label>
             <input type="text" id="userid" name="userid" required>
             <label for="password">Password:</label>
