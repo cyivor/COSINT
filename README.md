@@ -17,9 +17,9 @@ You need to manually create the cosint userdatabase at this moment in time - I'l
 * short-term
   - [x] create user database
   - [x] create register page
-  - [ ] create API endpoint for snusbase
-    * add local ratelimit 
-    * search all fields unless field is specified
+  - [x] create API endpoint for snusbase
+    - [ ] add local ratelimit 
+    - [ ] search all fields unless field is specified
 
 
 * long-term
