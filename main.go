@@ -3,8 +3,7 @@ package main
 /*
  * author - github.com/cyivor
  * short-term todo
-    * create user database
-      * encrypted
+    * create register section
 
  * long-term todo
     * add support for nosint
@@ -78,7 +77,8 @@ func main() {
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/static", "./static")
-	r.StaticFile("/favicon.ico", "./static/favicon.ico")
+	// r.StaticFile("/favicon.ico", "./static/favicon.ico")
+	// only keeping this because ill probably convert a png to ico at some point but i just don't know what logo yet lol
 
 	// root route
 	r.GET("/", handlers.RootHandler(apiRoute))
@@ -96,8 +96,13 @@ func main() {
 	// protected cosint routes
 	cosint := r.Group(apiRoute+"/cosint", handlers.AuthMiddleware(apiRoute, jwtSecret, logger))
 	{
+		// GET
 		cosint.GET("/", handlers.HomeHandler(apiRoute))
 		cosint.GET("/identity", handlers.VerifyIdentity)
+		cosint.GET("/create-new-user", handlers.NewUserHandler(apiRoute))
+
+		// POST
+		cosint.POST("/new", handlers.RegisterHandler(apiRoute, jwtSecret, dbKey))
 	}
 
 	// http server
@@ -111,7 +116,7 @@ func main() {
 
 	logger.Info("COSINT is online",
 		zap.String("url", "http://127.0.0.1:8000"),
-		zap.String("api_route", fmt.Sprintf("http://localhost:8000%s/cosint", key)),
+		zap.String("api_route", fmt.Sprintf("http://localhost:8000/%s/cosint", key)),
 	)
 	err = s.ListenAndServe()
 	if err != nil {

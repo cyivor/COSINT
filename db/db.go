@@ -28,19 +28,46 @@ func InitDB(dbPath, dbKey string, logger *zap.Logger) (*sql.DB, error) {
 	}
 
 	// create test user & pass
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("test"), bcrypt.DefaultCost)
-	if err != nil {
-		db.Close()
-		return nil, err
-	}
-	_, err = db.Exec("INSERT OR IGNORE INTO users (userid, password) VALUES (?, ?)", "test", string(hashedPassword))
-	if err != nil {
-		db.Close()
-		return nil, err
-	}
+	/*
+		 *
+		 * Only uncomment this if you want to test with a test account
+		 * creds for test account: test:test
+		 *
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("test"), bcrypt.DefaultCost)
+		if err != nil {
+			db.Close()
+			return nil, err
+		}
+		_, err = db.Exec("INSERT OR IGNORE INTO users (userid, password) VALUES (?, ?)", "test", string(hashedPassword))
+		if err != nil {
+			db.Close()
+			return nil, err
+		}
+	*/
 
 	logger.Info("db initialised", zap.String("path", dbPath))
 	return db, nil
+}
+
+func NewUser(dbPath, dbKey string, logger *zap.Logger, userid, password string) (bool, error) {
+	db, err := sql.Open("sqlite3", dbPath+"?_key="+dbKey)
+	if err != nil {
+		return false, err
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		db.Close()
+		return false, err
+	}
+	_, err = db.Exec("INSERT OR IGNORE INTO users (userid, password) VALUES (?, ?)", userid, string(hashedPassword))
+	if err != nil {
+		db.Close()
+		return false, err
+	}
+
+	logger.Info("user added to database successfully", zap.String("path", dbPath))
+	return true, nil
 }
 
 // integrate db

@@ -57,6 +57,43 @@ func AuthHandler(c *gin.Context) {
 	})
 }
 
+func NewUserHandler(apiRoute string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.HTML(http.StatusOK, "register.tmpl", gin.H{
+			"title":    "Create new user",
+			"apiRoute": apiRoute,
+		})
+	}
+}
+
+func RegisterHandler(apiRoute string, jwtSecret []byte, dbKey string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.PostForm("userid")
+		password := c.PostForm("password")
+
+		logger := c.MustGet("logger").(*zap.Logger)
+
+		// validate user against database
+		valid, err := db.NewUser("./cosint.db", dbKey, logger, userID, password)
+		if err != nil {
+			logger.Error("Failed to validate user", zap.String("userid", userID), zap.Error(err))
+			c.HTML(http.StatusInternalServerError, "auth.tmpl", gin.H{
+				"title": "Login",
+				"error": "Internal server error",
+			})
+			return
+		}
+		if !valid {
+			logger.Warn("Invalid credentials", zap.String("userid", userID))
+			c.HTML(http.StatusUnauthorized, "auth.tmpl", gin.H{
+				"title": "Login",
+				"error": "Invalid credentials",
+			})
+			return
+		}
+	}
+}
+
 func LoginHandler(apiRoute string, jwtSecret []byte, dbl *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.PostForm("userid")
