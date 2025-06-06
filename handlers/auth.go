@@ -147,6 +147,15 @@ func LoginHandler(apiRoute string, jwtSecret []byte, dbl *sql.DB) gin.HandlerFun
 			false,
 			true,
 		)
+		c.SetCookie( // will probably remove this eventually but i think its funny for now
+			"__evilCookie",
+			"why are you looking at cookies",
+			3600,
+			"/",
+			"",
+			false,
+			true,
+		)
 		logger.Info("Successful login", zap.String("userid", userID))
 		c.Redirect(http.StatusFound, apiRoute+"/cosint")
 	}

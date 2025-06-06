@@ -20,6 +20,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"cyivor/cosint/db"
@@ -58,6 +59,13 @@ func main() {
 	}
 
 	snusKey := os.Getenv("SNUSBASE_KEY")
+	ratelimitValue := os.Getenv("SBRATELIMIT")
+
+	sbratelimitValue, err := strconv.Atoi(ratelimitValue)
+
+	if err != nil {
+		logger.Fatal("Failed to get snusbase ratelimit value", zap.Error(err))
+	}
 
 	database, err := db.InitDB("./cosint.db", dbKey, logger)
 	if err != nil {
@@ -88,7 +96,7 @@ func main() {
 	extapir := capir + "/ext-apis"
 
 	// root route
-	r.GET("/", handlers.RootHandler(apiRoute))
+	r.GET("/", handlers.RootHandler(capir))
 
 	// set logger context for /login
 	r.Use(func(c *gin.Context) {
@@ -104,7 +112,7 @@ func main() {
 	externalAPIs := r.Group(extapir, handlers.AuthMiddleware(apiRoute, jwtSecret, logger))
 	{
 		// GET
-		cosint.GET("/", handlers.HomeHandler(capir))
+		cosint.GET("/", handlers.HomeHandler(capir, extapir))
 		cosint.GET("/identity", handlers.VerifyIdentity)
 		cosint.GET("/create-new-user", handlers.NewUserHandler(capir))
 
@@ -119,7 +127,7 @@ func main() {
 		externalAPIs.GET("/snusbase", handlers.SnusHandler(extapir))
 
 		// POST
-		externalAPIs.POST("/snusbase", handlers.SnusResults(capir, snusKey))
+		externalAPIs.POST("/snusbase", handlers.SnusResults(extapir, snusKey, sbratelimitValue))
 	}
 
 	// http server
