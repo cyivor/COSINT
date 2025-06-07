@@ -124,6 +124,9 @@ func main() {
 		externalAPIs.GET("/", func(c *gin.Context) {
 			c.Redirect(http.StatusFound, capir)
 		})
+
+		// Snusbase may become useless as nosint devs said they're adding the new
+		// fields
 		externalAPIs.GET("/snusbase", handlers.SnusHandler(extapir))
 
 		// POST

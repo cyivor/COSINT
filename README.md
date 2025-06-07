@@ -32,6 +32,14 @@ You need to manually create the cosint userdatabase at this moment in time - I'l
 * long-term
   - [ ] add support for nosint
   - [ ] add support for maigret
+    - [x] install maigret locally 
+      * using virtual environment
   - [ ] add support for telegram bots
     * parsing modules will be needed
   - [ ] add dorking support
+
+## Check developments
+- [Dev branch](https://github.com/cyivor/COSINT/tree/dev)
+- [Dev commits](https://github.com/cyivor/COSINT/commits/dev/)
+- [Main branch](https://github.com/cyivor/COSINT)
+- [Main commits](https://github.com/cyivor/COSINT/commits/main/)
