@@ -5,10 +5,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/gin-gonic/gin"
 )
+
+// localhost:x/<key>/cosint/int-apis/maigret GET
+func MaigretHandler(intapir string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.HTML(http.StatusOK, "maigret.tmpl", gin.H{
+			"title":   "Maigret search",
+			"intapir": intapir,
+		})
+	}
+}
 
 // maigret --no-color --no-progressbar -J=simple -a --id-type=username userhere
 func MaigretCommand(user string) {

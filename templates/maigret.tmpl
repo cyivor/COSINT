@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ .title }}</title>
+    <style>
+        .error { color: red; }
+        .form-container { max-width: 300px; margin: 50px auto; }
+        input { margin: 10px 0; padding: 5px; width: 100%; }
+        button { padding: 10px; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>{{ .title }}</h1>
+        {{ if .error }}
+            <p class="error">{{ .error }}</p>
+        {{ end }}
+        <form method="POST" action="{{ .inapir }}/maigret">
+        <!--- make handlers.Results --->
+            <label for="search">Search:</label>
+            <input type="text" id="search" name="search" required>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</body>
+</html>
