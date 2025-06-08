@@ -36,6 +36,7 @@ You can test by typing `maigret --version` into your terminal, if there's an out
   - [ ] add support for nosint
   - [ ] add support for maigret
     - [x] install maigret locally 
+    - [ ] fix report generation
       * using virtual environment
   - [ ] add support for telegram bots
     * parsing modules will be needed

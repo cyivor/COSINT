@@ -58,10 +58,26 @@ func main() {
 		logger.Fatal("DB_KEY environment variable not set")
 	}
 
+	// external api keys
 	snusKey := os.Getenv("SNUSBASE_KEY")
-	ratelimitValue := os.Getenv("SBRATELIMIT")
+	// nosintKey := os.Getenv("NOSINT_KEY")
 
-	sbratelimitValue, err := strconv.Atoi(ratelimitValue)
+	// ratelimit values
+	sbratelimitValue, err := strconv.Atoi(os.Getenv("SBRATELIMIT"))
+	if err != nil {
+		log.Fatalf("error fetching SBRATELIMIT: %v", err)
+	}
+	mgratelimitValue, err := strconv.Atoi(os.Getenv("MGRATELIMIT"))
+
+	if err != nil {
+		log.Fatalf("error fetching MGRATELIMIT: %v", err)
+	}
+	/* nsratelimitValue, err := strconv.Atoi(os.Getenv("NSRATELIMIT"))
+
+	if err != nil {
+		log.Fatalf("error fetching NSRATELIMIT: %v", err)
+	}
+	*/
 
 	if err != nil {
 		logger.Fatal("Failed to get snusbase ratelimit value", zap.Error(err))
@@ -122,7 +138,7 @@ func main() {
 	// base
 	{
 		// GET
-		cosint.GET("/", handlers.HomeHandler(capir, extapir))
+		cosint.GET("/", handlers.HomeHandler(capir, extapir, intapir))
 		cosint.GET("/identity", handlers.VerifyIdentity)
 		cosint.GET("/create-new-user", handlers.NewUserHandler(capir))
 
@@ -152,7 +168,10 @@ func main() {
 			c.Redirect(http.StatusFound, capir)
 		})
 
-		internalAPIs.GET("/maigret", handlers.MaigretHandler(intapir)) // placeholder
+		internalAPIs.GET("/maigret", handlers.MaigretHandler(intapir))
+
+		// POST
+		internalAPIs.POST("/maigret", handlers.MaigretResults(intapir, mgratelimitValue))
 
 	}
 

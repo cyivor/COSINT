@@ -23,7 +23,6 @@ func SnusHandler(extapir string) gin.HandlerFunc {
 // localhost:x/<key>/cosint/ext-apis/snusbase POST
 func SnusResults(capir string, snusKey string, ratelimitValue int) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header()
 		if snusKey == "" {
 			c.HTML(http.StatusUnauthorized, "enverror.tmpl", gin.H{
 				"title": "Environment Variable Error",

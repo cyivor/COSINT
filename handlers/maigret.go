@@ -9,8 +9,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // localhost:x/<key>/cosint/int-apis/maigret GET
@@ -20,6 +22,49 @@ func MaigretHandler(intapir string) gin.HandlerFunc {
 			"title":   "Maigret search",
 			"intapir": intapir,
 		})
+	}
+}
+
+// localhost:x/<key>/cosint/int-apis/maigret POST
+func MaigretResults(capir string, ratelimitValue int) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		searchTerm := c.PostForm("search")
+		logger := c.MustGet("logger").(*zap.Logger)
+
+		if searchTerm == "" {
+			logger.Error("Invalid form data", zap.String("search", searchTerm))
+			c.JSON(http.StatusBadRequest, gin.H{"error": "search parameter is required"})
+			return
+		}
+
+		// maigret results
+		response := ParseReport(searchTerm)
+
+		// check rate limit
+		RatelimitCount, err := AddLocalRL("_mg")
+		if err != nil {
+			logger.Error("Rate limit check failed", zap.Error(err))
+			c.HTML(http.StatusUnauthorized, "generalerror.tmpl", gin.H{
+				"title": "Rate Limit Error",
+				"err":   err.Error(),
+			})
+			time.Sleep(5 * time.Second)
+			c.Redirect(http.StatusFound, capir)
+			return
+		}
+
+		if RatelimitCount >= ratelimitValue {
+			logger.Warn("Rate limit exceeded", zap.Int("count", RatelimitCount))
+			c.HTML(http.StatusTooManyRequests, "generalerror.tmpl", gin.H{
+				"title": "You are ratelimited",
+				"err":   "You have sent too many requests. This is a local ratelimit put in place so you aren't barred from sending requests to the sites Maigret matches usernames against. If you would like to change it, navigate to your COSINT directory, use a text editor to modify the .env file, and change the value of MGRATELIMIT.",
+			})
+			time.Sleep(5 * time.Second)
+			c.Redirect(http.StatusFound, capir)
+			return
+		}
+
+		c.JSON(http.StatusOK, response)
 	}
 }
 
@@ -47,21 +92,26 @@ func FetchReport(user string) (string, error) {
 func ParseReport(user string) []types.Maigret {
 	MaigretCommand(user)
 
-	report, err := FetchReport(user)
+	reportPath, err := FetchReport(user)
 	if err != nil {
 		log.Fatalf("couldn't fetch report. Err: %v", err)
 	}
 
-	var result map[string]interface{}
-	err = json.Unmarshal([]byte(report), &result)
+	reportData, err := os.ReadFile(reportPath)
 	if err != nil {
-		log.Fatalf("error parsing json. Err %v", err)
+		log.Fatalf("couldn't read report file %s. Err: %v", reportPath, err)
 	}
 
-	// holds structs
+	// parse json into a map
+	var result map[string]interface{}
+	err = json.Unmarshal(reportData, &result)
+	if err != nil {
+		log.Fatalf("error parsing JSON. Err: %v", err)
+	}
+
 	maigretList := []types.Maigret{}
 
-	// each top level key
+	// top level keys
 	for _, siteData := range result {
 		siteMap, ok := siteData.(map[string]interface{})
 		if !ok {
@@ -69,7 +119,6 @@ func ParseReport(user string) []types.Maigret {
 			continue
 		}
 
-		// fields for struct
 		maigret := types.Maigret{}
 
 		// url_user

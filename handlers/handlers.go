@@ -23,11 +23,12 @@ func RootHandler(capir string) gin.HandlerFunc {
 }
 
 // localhost:x/home.tmpl
-func HomeHandler(capir string, extapir string) gin.HandlerFunc {
+func HomeHandler(capir string, extapir string, intapir string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.HTML(http.StatusOK, "home.tmpl", gin.H{
 			"title":   "Dashboard",
 			"extapir": extapir,
+			"intapir": intapir,
 			"capir":   capir,
 		})
 	}
@@ -42,6 +43,7 @@ func RLResponse(api string) string {
 	rlMap := map[string]types.LocalRateLimits{
 		"_sb": {Snusbase: "sbrl"},
 		"_ns": {NoSINT: "nsrl"},
+		"_mg": {Maigret: "mgrl"},
 	}
 
 	// get the rate limit struct for the api passed
@@ -57,6 +59,8 @@ func RLResponse(api string) string {
 		rlapi = rl.Snusbase
 	case "_ns":
 		rlapi = rl.NoSINT
+	case "_mg":
+		rlapi = rl.Maigret
 	default:
 		log.Fatalf("unknown api: %s", api)
 		// return api // uncomment for error handling instead of fatal
