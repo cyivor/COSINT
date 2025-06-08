@@ -94,6 +94,7 @@ func main() {
 	// these variables make it easier but now i have to go ahead and edit the template files
 	capir := apiRoute + "/cosint"
 	extapir := capir + "/ext-apis"
+	intapir := capir + "/int-apis"
 
 	// root route
 	r.GET("/", handlers.RootHandler(capir))
@@ -109,7 +110,16 @@ func main() {
 	r.POST("/login", handlers.LoginHandler(apiRoute, jwtSecret, database))
 
 	cosint := r.Group(capir, handlers.AuthMiddleware(apiRoute, jwtSecret, logger))
+
+	/*
+	 * includes
+	   * snusbase
+	   * nosint
+	*/
 	externalAPIs := r.Group(extapir, handlers.AuthMiddleware(apiRoute, jwtSecret, logger))
+	internalAPIs := r.Group(intapir, handlers.AuthMiddleware(apiRoute, jwtSecret, logger))
+
+	// base
 	{
 		// GET
 		cosint.GET("/", handlers.HomeHandler(capir, extapir))
@@ -119,6 +129,8 @@ func main() {
 		// POST
 		cosint.POST("/new", handlers.RegisterHandler(jwtSecret, dbKey))
 	}
+
+	// external
 	{
 		// GET
 		externalAPIs.GET("/", func(c *gin.Context) {
@@ -131,6 +143,17 @@ func main() {
 
 		// POST
 		externalAPIs.POST("/snusbase", handlers.SnusResults(extapir, snusKey, sbratelimitValue))
+	}
+
+	// internal
+	{
+		// GET
+		internalAPIs.GET("/", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, capir)
+		})
+
+		internalAPIs.GET("/maigret", handlers.MaigretHandler(intapir)) // placeholder
+
 	}
 
 	// http server

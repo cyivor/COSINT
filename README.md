@@ -20,6 +20,9 @@ DB_KEY=your_db_key
 2. Your `cosint.db`
 You need to manually create the cosint userdatabase at this moment in time - I'll probably edit this readme at some point and realise what I'm typing right now isn't useful
 
+3. Ensure Maigret is installed via `pip` so you can use it globally
+You can test by typing `maigret --version` into your terminal, if there's an output you're good to go. *If maigret was installed in a virtual environment, just source the activation file before using COSINT*
+
 ## Todo
 * short-term
   - [x] create user database
