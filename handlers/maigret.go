@@ -76,7 +76,7 @@ func MaigretCommand(user string) {
 // pythonlibs/maigret/reports/report_userhere_simple.json
 func FetchReport(user string) (string, error) {
 	fsep := string(filepath.Separator)
-	report := "pythonlibs" + fsep + "maigret" + fsep + "reports" + fsep + "report_" + user + "_simple.json"
+	report := "reports" + fsep + "report_" + user + "_simple.json"
 	reportInfo, err := os.Lstat(report)
 	if err != nil {
 		fmt.Println(err)
@@ -102,7 +102,6 @@ func ParseReport(user string) []types.Maigret {
 		log.Fatalf("couldn't read report file %s. Err: %v", reportPath, err)
 	}
 
-	// parse json into a map
 	var result map[string]interface{}
 	err = json.Unmarshal(reportData, &result)
 	if err != nil {
@@ -110,8 +109,6 @@ func ParseReport(user string) []types.Maigret {
 	}
 
 	maigretList := []types.Maigret{}
-
-	// top level keys
 	for _, siteData := range result {
 		siteMap, ok := siteData.(map[string]interface{})
 		if !ok {
@@ -120,20 +117,13 @@ func ParseReport(user string) []types.Maigret {
 		}
 
 		maigret := types.Maigret{}
-
-		// url_user
 		if urlUser, ok := siteMap["url_user"].(string); ok {
 			maigret.UrlUser = urlUser
 		}
-
-		// username
 		if username, ok := siteMap["username"].(string); ok {
 			maigret.User = username
 		}
-
-		// site object
 		if site, ok := siteMap["site"].(map[string]interface{}); ok {
-			// tags
 			if tags, ok := site["tags"].([]interface{}); ok {
 				for _, tag := range tags {
 					if tagStr, ok := tag.(string); ok {
@@ -142,16 +132,15 @@ func ParseReport(user string) []types.Maigret {
 				}
 			}
 		}
-
-		// status object
 		if status, ok := siteMap["status"].(map[string]interface{}); ok {
-			// site_name
 			if siteName, ok := status["site_name"].(string); ok {
 				maigret.SiteName = siteName
 			}
 		}
 
-		maigretList = append(maigretList, maigret)
+		if maigret.User != "" {
+			maigretList = append(maigretList, maigret)
+		}
 	}
 
 	return maigretList
